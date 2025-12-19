@@ -72,7 +72,7 @@ class BridgeFeasibilityCalc:
         # --- ROW 5: Span Length ---
         # Distance between cleats. Used for "Snaking Amplitude" calculation.
         ttk.Label(frame, text="Span / Cleat Distance (L) [mm]:").grid(row=5, column=0, sticky="w")
-        self.span_var = tk.DoubleVar(value=5000)#every 5m there is a cleate
+        self.span_var = tk.DoubleVar(value=10000)#every 10m there is a cleate
         ttk.Entry(frame, textvariable=self.span_var).grid(row=5, column=1)
 
         # --- ROW 6: Duct Width ---
@@ -302,7 +302,7 @@ class BridgeFeasibilityCalc:
             l_m = span_m                 # use your input as clamp spacing l
             l_rec_mm = 50.0 * De_mm      # Eq.13 recommended (for info)
 
-            f0_m = De_m                  # practical default (you can change if you later add a GUI input)
+            f0_m = De_m/2                  # practical default (you can change if you later add a GUI input)
             f_m  = math.sqrt(f0_m**2 + (4.0 / (math.pi**2)) * alpha_per_K * dt * (l_m**2))
 
             # Eq.16 thrust (proxy, depends on EI approximation)
