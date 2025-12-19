@@ -39,7 +39,7 @@ class BridgeFeasibilityCalc:
         # 1. Geometric Snake Width (Space check)
         # 2. Minimum bending radius for Radial Force check
         ttk.Label(frame, text="Cable Outer Diameter (De) [mm]:").grid(row=1, column=0, sticky="w")
-        self.dia_var = tk.DoubleVar(value=150)
+        self.dia_var = tk.DoubleVar(value=120)
         self.dia_entry = ttk.Entry(frame, textvariable=self.dia_var)
         self.dia_entry.grid(row=1, column=1)
         # Automatically update the spacing in Tab 2 when diameter changes
@@ -72,7 +72,7 @@ class BridgeFeasibilityCalc:
         # --- ROW 5: Span Length ---
         # Distance between cleats. Used for "Snaking Amplitude" calculation.
         ttk.Label(frame, text="Span / Cleat Distance (L) [mm]:").grid(row=5, column=0, sticky="w")
-        self.span_var = tk.DoubleVar(value=10000)#every 10m there is a cleate
+        self.span_var = tk.DoubleVar(value=12000)#every 12m there is a cleate
         ttk.Entry(frame, textvariable=self.span_var).grid(row=5, column=1)
 
         # --- ROW 6: Duct Width ---
@@ -290,7 +290,7 @@ class BridgeFeasibilityCalc:
             # ---- EI approximation from your E_eff + De (proxy!) ----
             # E_eff [N/mm²] -> [Pa]
             E_Pa = E_eff * 1e6
-            I_m4 = math.pi * (De_m ** 4) / 64.0
+            I_m4 = (math.pi * (De_m ** 4)) / 64.0 #second moment of inertia integral r^2 dA results pi r^4 / 4
             EI_Nm2 = E_Pa * I_m4
 
             # ============================================================
@@ -303,10 +303,10 @@ class BridgeFeasibilityCalc:
             l_rec_mm = 50.0 * De_mm      # Eq.13 recommended (for info)
 
             f0_m = De_m/2                  # practical default (you can change if you later add a GUI input)
-            f_m  = math.sqrt(f0_m**2 + (4.0 / (math.pi**2)) * alpha_per_K * dt * (l_m**2))
+            f_m  = math.sqrt(f0_m**2 + ((4.0* alpha_per_K * dt * (l_m**2)) / (math.pi**2))) #Equation 14
 
             # Eq.16 thrust (proxy, depends on EI approximation)
-            thrust_eu_N = (math.pi**2) * EI_Nm2 / (l_m**2) * (2.0 - 2.0 * (f0_m / f_m))
+            thrust_eu_N = (((math.pi**2) * EI_Nm2) / (l_m**2)) * ((f_m-f0_m)/(f_m))#(2.0 - 2.0 * (f0_m / f_m))
 
             # Geometric occupied width (practical interpretation):
             # width ≈ bundle width D + 2*f
@@ -331,9 +331,9 @@ class BridgeFeasibilityCalc:
             sigma_m = De_m
 
             delta_l_m = alpha_per_K * dt * L_m
-            n_m = math.sqrt(B_m**2 + (2.0 * L_m * delta_l_m) / 0.8) - B_m
+            n_m = math.sqrt(B_m**2 + ((2.0 * L_m * delta_l_m)*0.8)) - B_m   #Equation 20
 
-            width_jp_mm = (D_m + B_m + n_m + sigma_m) * 1000.0
+            width_jp_mm = (D_m + B_m + n_m + sigma_m) * 1000.0   #Equation 19
 
             # ============================================================
             # Output formatting + verdicts
